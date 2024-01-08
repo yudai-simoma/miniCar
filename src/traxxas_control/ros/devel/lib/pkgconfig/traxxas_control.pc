@@ -1,0 +1,8 @@
+prefix=/home/md/Desktop/extract_data_from_rosbag/traxxas_control/ros/devel
+
+Name: traxxas_control
+Description: Description of traxxas_control
+Version: 0.0.0
+Cflags: -I/home/md/Desktop/extract_data_from_rosbag/traxxas_control/ros/devel/include
+Libs: -L/home/md/Desktop/extract_data_from_rosbag/traxxas_control/ros/devel/lib 
+Requires: rospy message_runtime

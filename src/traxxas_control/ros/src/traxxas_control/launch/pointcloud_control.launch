@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="max_angle"           default="30"/>
+    <arg name="num_angles"          default="12"/>
+    <arg name="sphere_radius"       default="4"/>
+    <arg name="nan_coeff"           default="20"/>
+
+    <node pkg="traxxas_control" type="pointcloud_controller.py" name="traxxas" output="screen" cwd="node"/>
+	    <param name="max_angle" value="$(arg max_angle)"/>
+    	<param name="num_angles" value="$(arg num_angles)"/>
+    	<param name="sphere_radius" value="$(arg sphere_radius)"/>
+	    <param name="nan_coeff" value="$(arg nan_coeff)"/>
+    
+</launch>

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/md/Desktop/extract_data_from_rosbag/traxxas_control/ros/devel/setup.sh

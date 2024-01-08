@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="distance_threshold"  default="10"/>
+    <arg name="num_angles"          default="6"/>
+    <arg name="sphere_radius"       default="35"/>
+    <arg name="step_len"            default="120"/>
+    <arg name="debug"               default="1"/>
+    <arg name="steer_multiplier"    default="0.75"/>
+    <arg name="horizontal_stretch"  default="2"/>
+
+    <node pkg="traxxas_control" type="depth_controller.py" name="traxxas" output="screen" cwd="node"/>
+    	<param name="distance_threshold" value="$(arg distance_threshold)"/>
+    	<param name="num_angles" value="$(arg num_angles)"/>
+    	<param name="sphere_radius" value="$(arg sphere_radius)"/>
+    	<param name="step_len" value="$(arg step_len)"/>
+	    <param name="debug" value="$(arg debug)"/>
+	    <param name="steer_multiplier" value="$(arg steer_multiplier)"/>
+	    <param name="horizontal_stretch" value="$(arg horizontal_stretch)"/>
+    
+</launch>

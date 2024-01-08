@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="debug"               default="1"/>
+    <arg name="steer_multiplier"    default="2.25"/>
+    <!-- <arg name="model_path"          default="/home/ubuntu/sdcard/git-projects/traxxas_control/ros/src/traxxas_control/models/model_second_pond_waypoint_steer_log1p.h5"/>
+    <arg name="model_path"          default="/home/ubuntu/sdcard/git-projects/traxxas_control/ros/src/traxxas_control/models/model_second_and_third_waypoint_steer100_identity.h5"/> -->
+    <arg name="model_path"          default="/home/ubuntu/sdcard/git-projects/traxxas_control/ros/src/traxxas_control/models/model_second_and_third_waypoint_steer90_identity.h5"/>
+    <arg name="which_future_pred"    default="1"/>
+    <arg name="manual_throttle"      default="1"/>
+    <arg name="bottom"               default="1550"/>
+    <arg name="slope"                default="1"/>
+    <arg name="boost"                default="150"/>
+
+    <node pkg="traxxas_control" type="nn_controller.py" name="traxxas" output="screen" cwd="node"/>
+	    <param name="debug" value="$(arg debug)"/>
+	    <param name="steer_multiplier" value="$(arg steer_multiplier)"/>
+	    <param name="model_path" value="$(arg model_path)"/>
+	    <param name="which_future_pred" value="$(arg which_future_pred)"/>
+	    <param name="manual_throttle" value="$(arg manual_throttle)"/>
+	    <param name="bottom" value="$(arg bottom)"/>
+	    <param name="slope" value="$(arg slope)"/>
+	    <param name="boost" value="$(arg boost)"/>
+    
+</launch>
