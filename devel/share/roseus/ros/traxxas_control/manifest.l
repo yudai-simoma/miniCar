@@ -1,0 +1,1 @@
+/home/ubuntu/Desktop/catkin_ws/devel/.private/traxxas_control/share/roseus/ros/traxxas_control/manifest.l

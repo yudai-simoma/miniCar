@@ -1,0 +1,5 @@
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/lib/pkgconfig/sensor_package.pc, /home/ubuntu/Desktop/catkin_ws/devel/lib/pkgconfig/sensor_package.pc)
+Symlinking /home/ubuntu/Desktop/catkin_ws/devel/lib/sensor_package/cmake.lock
+Symlinking /home/ubuntu/Desktop/catkin_ws/devel/lib/sensor_package/sensor_node.py
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/share/sensor_package/cmake/sensor_packageConfig-version.cmake, /home/ubuntu/Desktop/catkin_ws/devel/share/sensor_package/cmake/sensor_packageConfig-version.cmake)
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/share/sensor_package/cmake/sensor_packageConfig.cmake, /home/ubuntu/Desktop/catkin_ws/devel/share/sensor_package/cmake/sensor_packageConfig.cmake)

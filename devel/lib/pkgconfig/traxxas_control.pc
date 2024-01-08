@@ -1,0 +1,1 @@
+/home/ubuntu/Desktop/catkin_ws/devel/.private/traxxas_control/lib/pkgconfig/traxxas_control.pc

@@ -1,0 +1,4 @@
+<launch>
+  <!-- auto_controller ノードの起動 -->
+  <node pkg="auto_control" type="auto_controller.py" name="auto_controller" output="screen" />
+</launch>

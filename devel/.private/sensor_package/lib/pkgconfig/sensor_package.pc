@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package
+
+Name: sensor_package
+Description: Description of sensor_package
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

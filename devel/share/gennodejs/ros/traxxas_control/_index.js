@@ -1,0 +1,1 @@
+/home/ubuntu/Desktop/catkin_ws/devel/.private/traxxas_control/share/gennodejs/ros/traxxas_control/_index.js

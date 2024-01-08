@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/Desktop/catkin_ws/install
+
+Name: traxxas_control
+Description: Description of traxxas_control
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: rospy message_runtime

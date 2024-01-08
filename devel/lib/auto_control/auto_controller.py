@@ -1,0 +1,1 @@
+/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/lib/auto_control/auto_controller.py

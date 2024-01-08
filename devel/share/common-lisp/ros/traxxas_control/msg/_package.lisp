@@ -1,0 +1,1 @@
+/home/ubuntu/Desktop/catkin_ws/devel/.private/traxxas_control/share/common-lisp/ros/traxxas_control/msg/_package.lisp

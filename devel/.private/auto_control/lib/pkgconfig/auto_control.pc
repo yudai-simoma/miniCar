@@ -1,0 +1,8 @@
+prefix=/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control
+
+Name: auto_control
+Description: Description of auto_control
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

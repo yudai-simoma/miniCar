@@ -1,0 +1,4 @@
+<launch>
+  <!-- sensor_node ノードの起動 -->
+  <node pkg="auto_control" type="sensor_node.py" name="sensor_node" output="screen" />
+</launch>

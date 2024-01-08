@@ -1,0 +1,7 @@
+sensor_package
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/cmake.lock /home/ubuntu/Desktop/catkin_ws/devel/./cmake.lock
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/lib/pkgconfig/sensor_package.pc /home/ubuntu/Desktop/catkin_ws/devel/lib/pkgconfig/sensor_package.pc
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/lib/sensor_package/cmake.lock /home/ubuntu/Desktop/catkin_ws/devel/lib/sensor_package/cmake.lock
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/lib/sensor_package/sensor_node.py /home/ubuntu/Desktop/catkin_ws/devel/lib/sensor_package/sensor_node.py
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/share/sensor_package/cmake/sensor_packageConfig-version.cmake /home/ubuntu/Desktop/catkin_ws/devel/share/sensor_package/cmake/sensor_packageConfig-version.cmake
+/home/ubuntu/Desktop/catkin_ws/devel/.private/sensor_package/share/sensor_package/cmake/sensor_packageConfig.cmake /home/ubuntu/Desktop/catkin_ws/devel/share/sensor_package/cmake/sensor_packageConfig.cmake

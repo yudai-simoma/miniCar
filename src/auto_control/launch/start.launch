@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Joy Node -->
+  <!-- <node respawn="true" pkg="joy" type="joy_node" name="joy" >
+      <param name="dev" type="string" value="/dev/input/js0" />
+      <param name="deadzone" value="0.12" />
+  </node> -->
+
+  <!-- ROSSerial Python -->
+  <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+      <param name="port" value="/dev/ttyACM0"/>
+      <param name="baud" value="57600" />
+  </node>
+
+  <!-- Joy Control -->
+  <!-- <include file="$(find auto_control)/launch/joy_control.launch" /> -->
+
+  <!-- Joy Control -->
+  <include file="$(find auto_control)/launch/auto_controller.launch" />
+
+  <!-- Joy Control -->
+  <include file="$(find auto_control)/launch/sensor_node.launch" />
+
+</launch>

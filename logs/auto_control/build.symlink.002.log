@@ -1,0 +1,6 @@
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/lib/pkgconfig/auto_control.pc, /home/ubuntu/Desktop/catkin_ws/devel/lib/pkgconfig/auto_control.pc)
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/lib/auto_control/auto_controller.py, /home/ubuntu/Desktop/catkin_ws/devel/lib/auto_control/auto_controller.py)
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/lib/auto_control/cmake.lock, /home/ubuntu/Desktop/catkin_ws/devel/lib/auto_control/cmake.lock)
+Symlinking /home/ubuntu/Desktop/catkin_ws/devel/lib/auto_control/sensor_node.py
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/share/auto_control/cmake/auto_controlConfig.cmake, /home/ubuntu/Desktop/catkin_ws/devel/share/auto_control/cmake/auto_controlConfig.cmake)
+Linked: (/home/ubuntu/Desktop/catkin_ws/devel/.private/auto_control/share/auto_control/cmake/auto_controlConfig-version.cmake, /home/ubuntu/Desktop/catkin_ws/devel/share/auto_control/cmake/auto_controlConfig-version.cmake)
