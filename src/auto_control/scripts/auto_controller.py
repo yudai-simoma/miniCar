@@ -56,16 +56,41 @@ class AutoController:
         self.right_distance = msg.range * 100
         # rospy.loginfo(f"Right side distance: {msg.range * 100} cm")
 
+    def calculate_servo_angle(self):
+        # 左右センサーの距離が20cm以上、前方センサーの距離が40cm以上離れているか確認
+        side_safe_distance = 20  # 左右のしきい値
+        front_safe_distance = 40  # 前方のしきい値
+        if self.left_distance > side_safe_distance and self.right_distance > side_safe_distance and \
+        self.front_left_distance > front_safe_distance and \
+        self.front_center_distance > front_safe_distance and \
+        self.front_right_distance > front_safe_distance:
+            return 125  # 直進
+
+        # 5つのセンサーからの距離データを元にサーボの角度を決定
+        min_distance = min(self.front_left_distance, self.front_center_distance,
+                           self.front_right_distance, self.left_distance,
+                           self.right_distance)
+
+        if self.front_center_distance == min_distance:
+            # 前方中央が最も近い場合、左右どちらかに逸らす
+            if self.left_distance < self.right_distance:
+                return 125 + 20  # 右に曲がる
+            else:
+                return 125 - 20  # 左に曲がる
+        elif self.front_left_distance == min_distance:
+            return 125 - 40  # 最も右に曲がる
+        elif self.front_right_distance == min_distance:
+            return 125 + 40  # 最も左に曲がる
+        elif self.left_distance == min_distance:
+            return 125 - 60  # 極端に右に曲がる
+        elif self.right_distance == min_distance:
+            return 125 + 60  # 極端に左に曲がる
+        else:
+            return 125  # 直進
+
     def update(self):
         if all([self.front_left_distance, self.front_center_distance, self.front_right_distance, self.left_distance, self.right_distance]):
-            # # 距離に基づいてサーボの制御
-            # if self.front_center_distance < 30:  # 30cm未満の場合停止
-            #     self.current_esc_pulse = self.esc_neutral
-            #     rospy.loginfo("Stopping vehicle due to close obstacle")
-            # else:
-            #     self.current_esc_pulse = min(self.current_esc_pulse + 10, self.esc_max)
-            #     rospy.loginfo(f"Setting ESC pulse to {self.current_esc_pulse}")
-
+            # 距離に基づいてサーボの制御
             if self.front_center_distance > 100:
                 # 距離が40cm以上の場合、スロットルを最も高く設定
                 self.current_esc_pulse = min(self.esc_neutral + 100, self.esc_max)
@@ -98,18 +123,7 @@ class AutoController:
             self.pwm.set_pwm(self.esc_channel, 0, self.current_esc_pulse)
 
             # サーボの向きを調整
-            distance_diff = self.left_distance - self.right_distance  # 左右の距離差
-
-            if distance_diff > 20:  # 左の方が右より20cm以上遠い場合
-                servo_angle = 125 + 40  # 最も左に曲がる
-            elif distance_diff > 10:  # 左の方が右より10cm以上遠い場合
-                servo_angle = 125 + 20  # 左に曲がる
-            elif distance_diff < -20:  # 右の方が左より20cm以上遠い場合
-                servo_angle = 125 - 40  # 最も右に曲がる
-            elif distance_diff < -10:  # 右の方が左より10cm以上遠い場合
-                servo_angle = 125 - 20  # 右に曲がる
-            else:
-                servo_angle = 125  # 直進
+            servo_angle = self.calculate_servo_angle()
 
             # サーボモーターのパルス長を計算して設定
             pulse_length = self.servo_min + int((self.servo_max - self.servo_min) / 180 * servo_angle)
