@@ -42,7 +42,7 @@ class AutoController:
 
     def front_center_callback(self, msg):
         self.front_center_distance = msg.range * 100
-        rospy.loginfo(f"Front center distance: {msg.range * 100} cm")
+        # rospy.loginfo(f"Front center distance: {msg.range * 100} cm")
 
     def front_right_callback(self, msg):
         self.front_right_distance = msg.range * 100
@@ -72,51 +72,45 @@ class AutoController:
                            self.right_distance)
 
         if self.front_center_distance == min_distance:
+            rospy.loginfo(f"Front center sensor is used. Distance: {min_distance} cm")
             # 前方中央が最も近い場合、左右どちらかに逸らす
             if self.left_distance < self.right_distance:
                 return 125 + 20  # 右に曲がる
             else:
                 return 125 - 20  # 左に曲がる
         elif self.front_left_distance == min_distance:
+            rospy.loginfo(f"Front left sensor is used. Distance: {min_distance} cm")
             return 125 - 40  # 最も右に曲がる
         elif self.front_right_distance == min_distance:
+            rospy.loginfo(f"Front right sensor is used. Distance: {min_distance} cm")
             return 125 + 40  # 最も左に曲がる
         elif self.left_distance == min_distance:
+            rospy.loginfo(f"Left sensor is used. Distance: {min_distance} cm")
             return 125 - 60  # 極端に右に曲がる
         elif self.right_distance == min_distance:
+            rospy.loginfo(f"Right sensor is used. Distance: {min_distance} cm")
             return 125 + 60  # 極端に左に曲がる
         else:
+            rospy.loginfo("No sensor is close enough. Going straight.")
             return 125  # 直進
 
     def update(self):
         if all([self.front_left_distance, self.front_center_distance, self.front_right_distance, self.left_distance, self.right_distance]):
             # 距離に基づいてサーボの制御
             if self.front_center_distance > 100:
-                # 距離が40cm以上の場合、スロットルを最も高く設定
-                self.current_esc_pulse = min(self.esc_neutral + 100, self.esc_max)
-                self.current_esc_pulse = min(self.esc_neutral + 80, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 25, self.esc_max)
             elif self.front_center_distance > 60:
-                # 距離が30cm以上40cm未満の場合、スロットルを少し低く設定
-#                self.current_esc_pulse = min(self.esc_neutral + 105, self.esc_max)
-                self.current_esc_pulse = min(self.esc_neutral + 80, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 25, self.esc_max)
             elif self.front_center_distance > 50:
-                # 距離が30cm以上40cm未満の場合、スロットルを少し低く設定
-#                self.current_esc_pulse = min(self.esc_neutral + 95, self.esc_max)
-                self.current_esc_pulse = min(self.esc_neutral + 80, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 25, self.esc_max)
             elif self.front_center_distance > 40:
-                # 距離が15cm以上30cm未満の場合、スロットルをさらに低く設定
-#                self.current_esc_pulse = min(self.esc_neutral + 90, self.esc_max)
-                self.current_esc_pulse = min(self.esc_neutral + 75, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
             elif self.front_center_distance > 30:
-                # 距離が6cm以上15cm未満の場合、スロットルを非常に低く設定
-#                self.current_esc_pulse = min(self.esc_neutral + 80, self.esc_max)
-                self.current_esc_pulse = min(self.esc_neutral + 75, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
             elif self.front_center_distance > 20:
-                # 距離が3cm以上6cm未満の場合、最低のスロットルを設定
-                self.current_esc_pulse = min(self.esc_neutral + 70, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 20, self.esc_max)
             elif self.front_center_distance > 15:
-                # 距離が3cm以上6cm未満の場合、最低のスロットルを設定
-                self.current_esc_pulse = min(self.esc_neutral + 70, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 20, self.esc_max)
             else:
                 # 距離が3cm未満の場合、停止
                 self.current_esc_pulse = self.esc_neutral
