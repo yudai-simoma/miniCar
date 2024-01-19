@@ -17,8 +17,8 @@ class AutoController:
 
         # サーボモーターの設定
         self.servo_channel = 8  # サーボモーターのチャンネル
-        self.servo_min = 150    # 最小パルス長
-        self.servo_max = 600    # 最大パルス長
+        self.servo_min = 285    # 最小パルス長
+        self.servo_max = 405    # 最大パルス長
 
         # 超音波センサーのデータを受け取るためのサブスクライバー
         self.sub_front_left = rospy.Subscriber('/ultrasonic/front_left', Range, self.front_left_callback)
@@ -75,24 +75,24 @@ class AutoController:
             rospy.loginfo(f"Front center sensor is used. Distance: {min_distance} cm")
             # 前方中央が最も近い場合、左右どちらかに逸らす
             if self.left_distance < self.right_distance:
-                return 125 + 20  # 右に曲がる
+                return 45  # 右に曲がる
             else:
-                return 125 - 20  # 左に曲がる
+                return 135  # 左に曲がる
         elif self.front_left_distance == min_distance:
             rospy.loginfo(f"Front left sensor is used. Distance: {min_distance} cm")
-            return 125 - 40  # 最も右に曲がる
+            return 160  # 最も右に曲がる
         elif self.front_right_distance == min_distance:
             rospy.loginfo(f"Front right sensor is used. Distance: {min_distance} cm")
-            return 125 + 40  # 最も左に曲がる
+            return 20  # 最も左に曲がる
         elif self.left_distance == min_distance:
             rospy.loginfo(f"Left sensor is used. Distance: {min_distance} cm")
-            return 125 - 60  # 極端に右に曲がる
+            return 180  # 極端に右に曲がる
         elif self.right_distance == min_distance:
             rospy.loginfo(f"Right sensor is used. Distance: {min_distance} cm")
-            return 125 + 60  # 極端に左に曲がる
+            return 0  # 極端に左に曲がる
         else:
             rospy.loginfo("No sensor is close enough. Going straight.")
-            return 125  # 直進
+            return 90  # 直進
 
     def update(self):
         if all([self.front_left_distance, self.front_center_distance, self.front_right_distance, self.left_distance, self.right_distance]):
@@ -122,20 +122,6 @@ class AutoController:
             # サーボモーターのパルス長を計算して設定
             pulse_length = self.servo_min + int((self.servo_max - self.servo_min) / 180 * servo_angle)
             self.pwm.set_pwm(self.servo_channel, 0, pulse_length)
-
-
-            # アルディノボードでの制御で使用
-            # # サーボモーターの角度を計算
-            # if self.left_distance < self.right_distance:
-            #     servo_angle = 125 + 20  # 右に曲がる
-            # elif self.left_distance > self.right_distance:
-            #     servo_angle = 125 - 20  # 左に曲がる
-            # else:
-            #     servo_angle = 125  # 直進
-
-            # # Arduinoにサーボの角度を送信
-            # # rospy.loginfo(f"servo_angle = {servo_angle}")
-            # self.pub_servo_cmd.publish(servo_angle)
 
 def main():
     rospy.init_node('auto_controller')
