@@ -8,7 +8,7 @@ from sensor_msgs.msg import Range
 trig_pin = 4
 echo_pins = [5, 6, 7, 8, 9]  # 各エコーピンの番号
 speed_of_sound = 34370  # 20℃での音速(cm/s)
-topics = ['/ultrasonic/left', '/ultrasonic/front_left', '/ultrasonic/front_center', '/ultrasonic/front_right', '/ultrasonic/right']
+topics = ['/ultrasonic/right', '/ultrasonic/front_right', '/ultrasonic/front_center', '/ultrasonic/front_left', '/ultrasonic/left']
 timeout = 0.01  # タイムアウト値（秒）
 
 def get_distance(trig_pin, echo_pin):
