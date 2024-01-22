@@ -34,6 +34,7 @@ class ServoTestController:
             return 90  # データがない場合は中立位置
 
         # 前方中央センサーのデータに基づくサーボ角度の設定
+        # 0:左、90:真ん中、180:右
         if self.front_center_distance > 30:
             rospy.loginfo(f"距離: {self.front_center_distance} cm, サーボ角度: 0度")
             return 0 # 左
