@@ -3,6 +3,8 @@ import rospy
 from std_msgs.msg import Int16
 from sensor_msgs.msg import Range
 import Adafruit_PCA9685
+import atexit
+
 
 class WallFollowerController:
     def __init__(self):
@@ -48,6 +50,14 @@ class WallFollowerController:
     def right_callback(self, msg):
         self.right_distance = msg.range * 100
 
+    def stop_motors(self):
+        rospy.loginfo("Stopping motors...")
+        # ESCとサーボモータを中立位置に設定
+        self.pwm.set_pwm(self.esc_channel, 0, int(self.esc_neutral))
+        self.pwm.set_pwm(self.servo_channel, 0, int(self.servo_medium))
+    
+
+    # アン1_______________________________________________________________________________________________________
     def calculate_servo_angle(self):
         front_left = self.front_left_distance
         front_right = self.front_right_distance
@@ -56,48 +66,87 @@ class WallFollowerController:
         left = self.left_distance
 
         f = r = l = e = 0
-        rospy.sleep(0.5)
+        rospy.sleep(0.3)
+        # rospy.loginfo({front})
+        # rospy.loginfo({right})
+        # rospy.loginfo({left})
+        # rospy.loginfo({front_left})
+        # rospy.loginfo({front_right})
 
-        while (e < 500):
-            if front > 40 and (left > 25 or front_left > 30) and (right > 25 or front_right > 30):
-                # rospy.loginfo("前方")
+        while (e < 7):
+            if front > 130:
                 f += 1
-            elif left > 25 or front_left > 30:
+            elif left < 43 or front_left < 48:
                 # rospy.loginfo("右折")
-                l += 1
-            elif right > 25 or front_right > 30:
-                # rospy.loginfo("左折")
                 r += 1
+                if front_left < left + 5:
+                    r += 1
+            elif right < 43 or front_right < 48:
+                # rospy.loginfo("左折")
+                l += 1
+                if front_right < right + 5:
+                    l += 1
             elif front <= 40:
                 if front_left <= front_right:
-                    # rospy.loginfo("前方が近づいたので右折")
                     r += 1
                 elif front_right <= front_left:
                     l += 1
             e += 1
-            if f > 200:
+            if f > 3:
                 rospy.loginfo("前進")
                 return 90
-            if e > 400 and r > l:
+            if r > 3:
                 rospy.loginfo("右折")
                 return 180
-            if e > 400 and l > r:
+            if l > 3:
                 rospy.loginfo("左折")
                 return 0
-            # if e > 7:
-                # break
         return None
+    
+    # あん２__________________________________________________________________________________________________________
+    # 左にずっと酔っていたい
+    def calculate_servo_angle(self):
+        front_left = self.front_left_distance
+        front_right = self.front_right_distance
+        front = self.front_center_distance
+        right = self.right_distance
+        left = self.left_distance
+
+        f = r = l = e = 0
+        rospy.sleep(0.1)
+        # rospy.loginfo({front})
+        # rospy.loginfo({right})
+        # rospy.loginfo({left})
+        # rospy.loginfo({front_left})
+        # rospy.loginfo({front_right})
+        if (left > 50 and right > 50) and front < 40:
+            return 180
+        if left < 50 and front_left < 55:
+            if  (left < 30 and front_left < 33) or (left + 5 < front_left):
+                return 180
+            return 90
+        else:
+            return 0
+    
+
+
 
     def update(self):
         if all([self.front_left_distance, self.front_center_distance, self.front_right_distance, self.left_distance, self.right_distance]):
+            # 前方の3つのセンサーから最小の距離を取得
             min_front_distance = min(self.front_left_distance, self.front_center_distance, self.front_right_distance)
+            # 右と左のセンサーから最小の距離を取得
+            min_side_distance = min(self.left_distance, self.right_distance)
 
+            # 距離に基づいてサーボの制御
             if min_front_distance > 5:
-                self.current_esc_pulse = min(self.esc_neutral + 10, self.esc_max)
-            elif min_front_distance > 3:
-                self.current_esc_pulse = min(self.esc_neutral + 10, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
             else:
-                self.current_esc_pulse = self.esc_neutral
+                self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
+                pulse_length = self.servo_min + int((self.servo_max - self.servo_min) / 180 * 90)
+                self.pwm.set_pwm(self.servo_channel, 0, pulse_length)
+                self.current_esc_pulse = min(self.esc_neutral - 27, self.esc_max)
+
 
             self.pwm.set_pwm(self.esc_channel, 0, self.current_esc_pulse)
 
@@ -116,6 +165,8 @@ def main():
     rospy.init_node('wall_follower_controller')
     controller = WallFollowerController()
     rate = rospy.Rate(10)  # 10Hz
+    # プログラム終了時にモータ停止関数を呼び出す
+    atexit.register(controller.stop_motors)
     while not rospy.is_shutdown():
         controller.update()
         rate.sleep()
