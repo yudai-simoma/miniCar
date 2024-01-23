@@ -18,7 +18,8 @@ class AutoController:
         # サーボモーターの設定
         self.servo_channel = 8  # サーボモーターのチャンネル
         self.servo_min = 285    # 最小パルス長
-        self.servo_max = 405    # 最大パルス長
+        self.servo_max = 410    # 最大パルス長
+        self.servo_medium = ((self.servo_max - self.servo_min) / 2) + self.servo_min    # 中央パルス長
 
         # 超音波センサーのデータを受け取るためのサブスクライバー
         self.sub_front_left = rospy.Subscriber('/ultrasonic/front_left', Range, self.front_left_callback)
@@ -34,11 +35,16 @@ class AutoController:
         self.right_distance = None
 
         # PID parameters
-        self.Kp = 0.4       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
-        self.Ki = 0.001     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
-        self.Kd = 0.01      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+        self.Kp = 3.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
+        self.Ki = 0.000     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
+        self.Kd = 0.00      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+        # self.Kp = 3.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
+        # self.Ki = 0.000     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
+        # self.Kd = 0.00      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+
         self.err_total = 0
         self.err_prev = 0
+        self.err = 0
 
     def front_left_callback(self, msg):
         self.front_left_distance = msg.range * 100
@@ -62,21 +68,12 @@ class AutoController:
         # 右と左のセンサーから最小の距離を取得
         min_side_distance = min(self.left_distance, self.right_distance)
 
-        # ログを出すためのコード
-        if min_front_distance == self.front_left_distance:
-            sensor_used = "前方左"
-        elif min_front_distance == self.front_center_distance:
-            sensor_used = "前方中央"
-        else:
-            sensor_used = "前方右"
-        rospy.loginfo(f"\t{sensor_used}センサーの最小距離: {min_front_distance} cm。")
-
         # 前方のセンサーが15cm未満、または左右のセンサーが2cm未満の場合、停止
-        if min_front_distance <= 10:
-            rospy.loginfo(f"前方のセンサーが10cm未満 ({min_front_distance} cm) なので停止します。")
+        if min_front_distance <= 5:
+            rospy.loginfo(f"前方のセンサーが5cm未満 ({min_front_distance} cm) なので停止します。")
             self.current_esc_pulse = self.esc_neutral
         elif min_side_distance <= 3:
-            rospy.loginfo(f"左右のセンサーのうち、最小距離が2cm未満 ({min_side_distance} cm) なので停止します。")
+            rospy.loginfo(f"左右のセンサーのうち、最小距離が3cm未満 ({min_side_distance} cm) なので停止します。")
             self.current_esc_pulse = self.esc_neutral
         else:
             # 距離に基づいてサーボの制御
@@ -91,9 +88,9 @@ class AutoController:
             # elif min_front_distance > 25:
             #     self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
             if min_front_distance > 20:
-                self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
-            elif min_front_distance > 10:
-                self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
+                self.current_esc_pulse = min(self.esc_neutral + 21, self.esc_max)
+            elif min_front_distance > 5:
+                self.current_esc_pulse = min(self.esc_neutral + 21, self.esc_max)
             else:
                 self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
@@ -101,17 +98,32 @@ class AutoController:
 
     # サーボモータの制御を行う関数
     def control_servo(self):
-        err = self.front_right_distance - self.front_left_distance
-        self.err_total += err
-        P = err * self.Kp
+        self.err_prev = self.err
+        self.err = self.front_right_distance - self.front_left_distance
+        self.err_total += self.err
+        P = self.err * self.Kp
         I = self.err_total * self.Ki
-        D = (err - self.err_prev) * self.Kd
-        self.err_prev = err
+        D = (self.err_prev - self.err) * self.Kd
 
-        steer_pwm = self.servo_min + int((self.servo_max - self.servo_min) / 180 * (90 + P + I + D))
-        steer_pwm = max(min(steer_pwm, self.servo_max), self.servo_min)
+        rospy.loginfo(f"Front_right_distance = {self.front_right_distance}, Front_left_distance = {self.front_left_distance}")
+        rospy.loginfo(f"P = {P}, I = {I}, D = {D}, all = {P + I + D}")
 
-        self.pwm.set_pwm(self.servo_channel, 0, steer_pwm)
+        # 左側の壁からの距離に基づいてステアリングを調整する
+        # ここでは、左側の距離が特定の閾値より小さい場合、右にステアリングを切る
+        left_wall_threshold = 40  # 15cm以下の場合、左の壁に近づいていると判断
+        if self.front_left_distance < left_wall_threshold:
+            rospy.loginfo(f"左の壁に近づいているため、右にステアリングを切ります。")
+            P += 20  # この値は実際の挙動を見て調整する
+
+		# TODO:おそらく不要
+        # steer_pwm = self.servo_min + int((self.servo_max - self.servo_min) / 180 * (90 + P + I + D))
+        # steer_pwm = self.servo_min + int(90 + P + I + D)
+        steer_pwm = int(P + I + D)
+
+        steer_pwm = max(min(self.servo_medium + steer_pwm, self.servo_max), self.servo_min)
+
+        rospy.loginfo(f"servo_pwm = '{int(steer_pwm)}'\n")
+        self.pwm.set_pwm(self.servo_channel, 0, int(steer_pwm))
 
     def update(self):
         if all([self.front_left_distance, self.front_center_distance, self.front_right_distance, self.left_distance, self.right_distance]):
