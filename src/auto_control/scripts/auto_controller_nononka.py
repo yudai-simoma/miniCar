@@ -56,33 +56,32 @@ class WallFollowerController:
         left = self.left_distance
 
         f = r = l = e = 0
-        rospy.sleep(0.3)
+        rospy.sleep(0.5)
 
-        while (r + f + l + e < 10):
-            if front > 40 and (left > 20 or front_left > 25) and (right > 20 or front_right > 25):
+        while (e < 500):
+            if front > 40 and (left > 25 or front_left > 30) and (right > 25 or front_right > 30):
                 # rospy.loginfo("前方")
                 f += 1
-            elif left < 20 or front_left < 25:
+            elif left > 25 or front_left > 30:
                 # rospy.loginfo("右折")
-                r += 1
-            elif right < 20 or front_right < 25:
-                # rospy.loginfo("左折")
                 l += 1
+            elif right > 25 or front_right > 30:
+                # rospy.loginfo("左折")
+                r += 1
             elif front <= 40:
                 if front_left <= front_right:
                     # rospy.loginfo("前方が近づいたので右折")
                     r += 1
                 elif front_right <= front_left:
                     l += 1
-            else:
-                e += 1
-            if f > 7:
+            e += 1
+            if f > 200:
                 rospy.loginfo("前進")
                 return 90
-            if r > 7:
+            if e > 400 and r > l:
                 rospy.loginfo("右折")
                 return 180
-            if l > 7:
+            if e > 400 and l > r:
                 rospy.loginfo("左折")
                 return 0
             # if e > 7:
