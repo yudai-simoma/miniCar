@@ -119,14 +119,42 @@ class WallFollowerController:
         rospy.loginfo("__________________________ftront%s",{front})
         rospy.loginfo("__________________________________________front_right%s",{front_right})
         rospy.loginfo("___________________________________________________________________right%s",{right})
-        if (left > 50 and right > 50) and front < 40:
+        if front_right < 26 or right < 23:
+            return 0
+        if left > 50 and right > 40 and front < 40:
+            if (front_left > front_right):
+                return 0
             return 180
-        if left < 50 and front_left < 55:
-            if  (left < 30 and front_left < 33) or (left + 5 < front_left):
+        if left < 50 and front_left > 60:
+            return 0
+        if front_left < 50 or left < 45:
+            if (front_left < 26 or left <23):
                 return 180
-            return 90
+            else:
+                return 90
         else:
             return 0
+
+        # if (left > 50 and right > 50) and front < 40
+        #     return 180
+        # if left < 50 and front_left < 55:
+        #     if  (left < 30 and front_left < 33) or(left + 5 < front_left):
+        #         return 180
+        #     return 90
+        # else:
+        #     return 0
+
+
+        # if front < 50 or ((front_left > 50) and (right > 100)):
+        #     if front_left > 70:
+        #         return 0
+        #     return 180
+        # if front_left < 55:
+        #     if  front_left < 33 or (left + 5 < front_left):
+        #         return 180migika直線
+        #     return 90
+        # else:
+        #     return 0
     
 
 
