@@ -3,6 +3,7 @@ import rospy
 from std_msgs.msg import Int16
 from sensor_msgs.msg import Range
 import Adafruit_PCA9685
+import atexit
 
 class WallFollowerController:
     def __init__(self):
@@ -48,11 +49,17 @@ class WallFollowerController:
     def right_callback(self, msg):
         self.right_distance = msg.range * 100
 
+    def stop_motors(self):
+        rospy.loginfo("Stopping motors...")
+        # ESCとサーボモータを中立位置に設定
+        self.pwm.set_pwm(self.esc_channel, 0, int(self.esc_neutral))
+        self.pwm.set_pwm(self.servo_channel, 0, int(self.servo_medium))
+
     def calculate_servo_angle(self):
-        left_distance_desired = 35  # 左壁からの望ましい距離
-        left_front_distance_safe = 45  # 左前方の安全距離
-        right_distance_desired = 75  # 右壁からの望ましい距離
-        right_front_distance_safe = 80  # 右前方の安全距離
+        left_distance_desired = 30  # 左壁からの望ましい距離
+        left_front_distance_safe = 40  # 左前方の安全距離
+        right_distance_desired = 55  # 右壁からの望ましい距離
+        right_front_distance_safe = 60  # 右前方の安全距離
         front_distance_stop = 4  # 前方の停止距離
         right_distance_stop = 2   # 右側の停止距離
         front_center_distance_safe = 10  # 前方中央の安全最小距離
@@ -88,12 +95,13 @@ class WallFollowerController:
         if closer_left_distance == self.left_distance and \
         self.left_distance > left_distance_desired:
             rospy.loginfo("左壁からの距離が安全範囲内にあるため、左に舵を切ります。")
-            return 45  # 左に曲がる
-        elif self.left_distance < left_distance_desired:
+            return 50  # 左に曲がる
+        elif closer_left_distance == self.left_distance and \
+        self.left_distance < left_distance_desired:
             # 右側のセンサーの値を考慮して右か左かを決定
             if self.right_distance > right_distance_desired:
                 rospy.loginfo("右側が安全であるため、右に舵を切ります。")
-                return 180  # 安全なら右に曲がる
+                return 140  # 安全なら右に曲がる
             else:
                 rospy.loginfo("右側が安全でないため、左に舵を切ります。")
                 return 0  # 右側が安全でなければ左に曲がる
@@ -102,12 +110,13 @@ class WallFollowerController:
         if closer_left_distance == self.front_left_distance and \
         self.front_left_distance > left_front_distance_safe:
             rospy.loginfo("左前方からの距離が安全範囲内にあるため、左に舵を切ります。")
-            return 45  # 左に曲がる
-        elif self.front_left_distance < left_front_distance_safe:
+            return 50  # 左に曲がる
+        elif closer_left_distance == self.front_left_distance and \
+        self.front_left_distance < left_front_distance_safe:
             # 右側のセンサーの値を考慮して右か左かを決定
             if self.front_right_distance > right_front_distance_safe:
                 rospy.loginfo("右前方が安全であるため、右に舵を切ります。")
-                return 179  # 安全なら右に曲がる
+                return 139  # 安全なら右に曲がる
             else:
                 rospy.loginfo("右前方が安全でないため、左に舵を切ります。")
                 return 50  # 右側が安全でなければ左に曲がる
@@ -160,7 +169,9 @@ class WallFollowerController:
 def main():
     rospy.init_node('wall_follower_controller')
     controller = WallFollowerController()
-    rate = rospy.Rate(10)  # 10Hz
+    rate = rospy.Rate(30)  # 1秒間に30回
+    # プログラム終了時にモータ停止関数を呼び出す
+    atexit.register(controller.stop_motors)
     while not rospy.is_shutdown():
         controller.update()
         rate.sleep()

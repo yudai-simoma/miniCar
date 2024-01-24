@@ -5,7 +5,7 @@ from sensor_msgs.msg import Range
 import Adafruit_PCA9685
 import atexit
 
-# 両壁の中央を走るプログラム
+# 左壁を走るプログラム
 class AutoController:
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
@@ -37,9 +37,9 @@ class AutoController:
         self.right_distance = None
 
         # PID parameters
-        self.Kp = 0.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
-        self.Ki = 0.00     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
-        self.Kd = 0.0      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+        self.Kp = 1.4       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
+        self.Ki = 0.03     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
+        self.Kd = 0.3      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
         # self.Kp = 3.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
         # self.Ki = 0.000     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
         # self.Kd = 0.00      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
@@ -97,36 +97,45 @@ class AutoController:
     # サーボモータの制御を行う関数
     def control_servo(self):
         self.err_prev = self.err
-        self.err = self.front_right_distance - self.front_left_distance
+        left_distance_desired = 400  # 左壁からの目標距離 (40cm)
+        steering_sensitivity = 0.1  # ステアリングの感度
+
+        # 左側と前方左センサーからの距離の平均を計算
+        if self.left_distance is not None and self.front_left_distance is not None:
+            average_left_distance = (self.left_distance + self.front_left_distance) / 2
+            self.err = average_left_distance - left_distance_desired
+            rospy.loginfo(f"左側および前方左センサーからの平均距離: {average_left_distance}cm")
+        elif self.left_distance is not None:
+            self.err = self.left_distance - left_distance_desired
+            rospy.loginfo(f"左側センサーからの距離: {self.left_distance}cm")
+        elif self.front_left_distance is not None:
+            self.err = self.front_left_distance - left_distance_desired
+            rospy.loginfo(f"前方左センサーからの距離: {self.front_left_distance}cm")
+        else:
+            rospy.loginfo("左側および前方左センサーが利用できません。中央位置に設定します。")
+            P = I = D = 0
+            steer_pwm = self.servo_medium
+            self.pwm.set_pwm(self.servo_channel, 0, steer_pwm)
+            return
+
+        # 距離に応じてステアリングを制御
+        if self.err > 0:
+            # 左壁から遠すぎる場合は左にステアリング
+            P = self.err * self.Kp * steering_sensitivity
+        else:
+            # 左壁に近すぎる場合は右にステアリング
+            P = self.err * self.Kp * steering_sensitivity * -1
+
+        I = self.err_total * self.Ki * steering_sensitivity
+        D = (self.err_prev - self.err) * self.Kd * steering_sensitivity
         self.err_total += self.err
-        P = self.err * self.Kp
-        I = self.err_total * self.Ki
-        D = (self.err_prev - self.err) * self.Kd
+        self.err_prev = self.err
 
-        rospy.loginfo(f"Front_right_distance = {self.front_right_distance}, Front_left_distance = {self.front_left_distance}")
-        rospy.loginfo(f"P = {P}, I = {I}, D = {D}, all = {P + I + D}")
+        rospy.loginfo(f"P: {P}, I: {I}, D: {D}")
+        steer_pwm = self.servo_medium + int(P + I + D)
+        steer_pwm = max(min(steer_pwm, self.servo_max), self.servo_min)
+        rospy.loginfo(f"ステアリングPWM: {steer_pwm}")
 
-        # 左側の壁からの距離に基づいてステアリングを調整する
-        # ここでは、左側の距離が特定の閾値より小さい場合、右にステアリングを切る
-        left_wall_threshold = 30  # 15cm以下の場合、左の壁に近づいていると判断
-        right_wall_threshold = 60
-        if self.front_left_distance < left_wall_threshold or \
-            self.left_distance < left_wall_threshold:
-            rospy.loginfo(f"左の壁に近づいているため、右にステアリングを切ります。")
-            P += 40  # この値は実際の挙動を見て調整する
-        elif self.front_right_distance < right_wall_threshold or \
-            self.right_distance < right_wall_threshold:
-            rospy.loginfo(f"右の壁に近づいているため、左にステアリングを切ります。")
-            P -= 40  # この値は実際の挙動を見て調整する
-
-		# TODO:おそらく不要
-        # steer_pwm = self.servo_min + int((self.servo_max - self.servo_min) / 180 * (90 + P + I + D))
-        # steer_pwm = self.servo_min + int(90 + P + I + D)
-        steer_pwm = int(P + I + D)
-
-        steer_pwm = max(min(self.servo_medium + steer_pwm, self.servo_max), self.servo_min)
-
-        rospy.loginfo(f"servo_pwm = '{int(steer_pwm)}'\n")
         self.pwm.set_pwm(self.servo_channel, 0, int(steer_pwm))
 
     def update(self):
@@ -141,7 +150,7 @@ class AutoController:
 def main():
     rospy.init_node('auto_controller')
     controller = AutoController()
-    rate = rospy.Rate(30)
+    rate = rospy.Rate(30)  # 10Hz
     # プログラム終了時にモータ停止関数を呼び出す
     atexit.register(controller.stop_motors)
     while not rospy.is_shutdown():
