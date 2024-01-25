@@ -123,7 +123,7 @@ class AutoController:
             if self.front_center_distance < 20:
                 rospy.loginfo("----->>>>")
                 P += 50
-            if self.front_left_distance < self.front_right_distance:
+            elif self.front_left_distance < self.front_right_distance:
                 rospy.loginfo("----->>>>")
                 P += 50
             else:
