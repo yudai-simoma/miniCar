@@ -13,7 +13,8 @@ class AutoController:
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
         self.pwm.set_pwm_freq(60)
-
+        # ... [他の初期化コード] ...
+        self.log_counter = 0  # 追加: ログカウンターの初期化
         self.esc_channel = 2
         self.esc_neutral = 307
         self.esc_max = 511
@@ -68,12 +69,12 @@ class AutoController:
         if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
             rospy.loginfo(f"\t前方右センサー距離: {self.right_for_distance} cm")
 
-    def left_callback(self, msg):
+    def left_near_callback(self, msg):
         self.left_near_distance = msg.range * 100
         if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
             rospy.loginfo(f"\t\t\t\t左側センサー距離: {self.left_near_distance} cm")
 
-    def right_callback(self, msg):
+    def right_near_callback(self, msg):
         self.right_near_distance = msg.range * 100
         if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
             rospy.loginfo(f"右側センサー距離: {self.right_near_distance} cm")
