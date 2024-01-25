@@ -8,7 +8,7 @@ import atexit
 # 両壁の中央を走るプログラム
 class AutoController:
 
-    UPDATE_RATE = 15  # 更新頻度（1秒間に何回処理を行うか）
+    UPDATE_RATE = 25  # 更新頻度（1秒間に何回処理を行うか）
 
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
@@ -43,9 +43,9 @@ class AutoController:
         # self.Kp = 2.2       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
         # self.Ki = 0.01     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
         # self.Kd = 0.5      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
-        self.Kp = 2.3       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
-        self.Ki = 0.001     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
-        self.Kd = 0.6      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+        self.Kp = 1.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
+        self.Ki = 0.0001     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
+        self.Kd = 0.2      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
 
         self.err_total = 0
         self.err_prev = 0
@@ -104,7 +104,7 @@ class AutoController:
         # if min_front_distance > 20:
         #     self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
         if min_front_distance > 1:
-            self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
+            self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
@@ -121,19 +121,21 @@ class AutoController:
 
         if self.front_right_distance < 20:
             P -= 50  # ステアリングを大きく左に切る
-            rospy.loginfo("右側センサーが近いため、左にステアリングを切ります。")
+            rospy.loginfo("右側前方センサーが近いため、左にステアリングを切ります。")
         # 左側センサーが10cmより近い場合、右に大きくステアリングを切る
-        if self.front_left_distance < 20:
+        elif self.front_left_distance < 20:
             P += 50  # ステアリングを大きく右に切る
-            rospy.loginfo("左側センサーが近いため、右にステアリングを切ります。")
+            rospy.loginfo("左側前方センサーが近いため、右にステアリングを切ります。")
         # 右側センサーが10cmより近い場合、左に大きくステアリングを切る
-        if self.right_distance < 5:
+        elif self.right_distance < 5:
             P -= 50  # ステアリングを大きく左に切る
             rospy.loginfo("右側センサーが近いため、左にステアリングを切ります。")
         # 左側センサーが10cmより近い場合、右に大きくステアリングを切る
-        if self.left_distance < 5:
+        elif self.left_distance < 5:
             P += 50  # ステアリングを大きく右に切る
             rospy.loginfo("左側センサーが近いため、右にステアリングを切ります。")
+        else:
+            rospy.loginfo("！！！安全！！！")
 
         steer_pwm = int(P + I + D)
 

@@ -12,6 +12,7 @@ topics = ['/ultrasonic/right', '/ultrasonic/front_right', '/ultrasonic/front_cen
 timeout = 0.01  # タイムアウト値（秒）
 
 MAX_DISTANCE = 200.0  # タイムアウト時に返す最大距離(cm)
+UPDATE_RATE = 25  # 更新頻度（1秒間に何回処理を行うか）
 
 def get_distance(trig_pin, echo_pin):
     try:
@@ -48,7 +49,7 @@ def sensor_node():
 
         rospy.init_node('sensor_node', anonymous=True)
         pubs = [rospy.Publisher(topic, Range, queue_size=10) for topic in topics]
-        rate = rospy.Rate(15)  # 1秒間に20回の頻度で実行
+        rate = rospy.Rate(UPDATE_RATE)  # 1秒間に20回の頻度で実行
 
         while not rospy.is_shutdown():
             for i, (pin, pub) in enumerate(zip(echo_pins, pubs)):
