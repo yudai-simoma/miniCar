@@ -13,8 +13,6 @@ class AutoController:
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
         self.pwm.set_pwm_freq(60)
-        # ... [他の初期化コード] ...
-        self.log_counter = 0  # 追加: ログカウンターの初期化
         self.esc_channel = 2
         self.esc_neutral = 307
         self.esc_max = 511
