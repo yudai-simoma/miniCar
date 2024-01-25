@@ -8,7 +8,7 @@ import atexit
 # 両壁の中央を走るプログラム
 class AutoController:
 
-    UPDATE_RATE = 22  # 更新頻度（1秒間に何回処理を行うか）
+    UPDATE_RATE = 26  # 更新頻度（1秒間に何回処理を行うか）
 
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
@@ -43,9 +43,9 @@ class AutoController:
         # self.Kp = 2.2       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
         # self.Ki = 0.01     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
         # self.Kd = 0.5      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
-        self.Kp = 2.0       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
+        self.Kp = 2.3       # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
         self.Ki = 0.001     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
-        self.Kd = 0.5      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
+        self.Kd = 0.6      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
 
         self.err_total = 0
         self.err_prev = 0
@@ -56,12 +56,12 @@ class AutoController:
     def front_left_callback(self, msg):
         self.front_left_distance = msg.range * 100
         if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-            rospy.loginfo(f"\t\t\t\t前方左センサー距離: {self.front_left_distance} cm")
+            rospy.loginfo(f"\t\t\t前方左センサー距離: {self.front_left_distance} cm")
 
     def front_center_callback(self, msg):
         self.front_center_distance = msg.range * 100
         if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-            rospy.loginfo(f"\t\t\t前方中央センサー距離: {self.front_center_distance} cm")
+            rospy.loginfo(f"\t\t前方中央センサー距離: {self.front_center_distance} cm")
 
     def front_right_callback(self, msg):
         self.front_right_distance = msg.range * 100
@@ -70,13 +70,13 @@ class AutoController:
 
     def left_callback(self, msg):
         self.left_distance = msg.range * 100
-        if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-            rospy.loginfo(f"\t\t\t\t\t左側センサー距離: {self.left_distance} cm")
+        # if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
+        #     rospy.loginfo(f"\t\t\t\t\t左側センサー距離: {self.left_distance} cm")
 
     def right_callback(self, msg):
         self.right_distance = msg.range * 100
-        if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-            rospy.loginfo(f"右側センサー距離: {self.right_distance} cm")
+        # if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
+        #     rospy.loginfo(f"右側センサー距離: {self.right_distance} cm")
 
     def stop_motors(self):
         rospy.loginfo("Stopping motors...")
@@ -103,8 +103,8 @@ class AutoController:
         # 距離に基づいてサーボの制御
         # if min_front_distance > 20:
         #     self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
-        if min_front_distance > 5:
-            self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
+        if min_front_distance > 1:
+            self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
@@ -162,6 +162,7 @@ class AutoController:
 
             self.log_counter += 1  # カウンターをインクリメント
             if self.log_counter >= self.UPDATE_RATE:
+                print()
                 self.log_counter = 0  # カウンターをリセット
 
 def main():
