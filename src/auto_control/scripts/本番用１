@@ -5,6 +5,9 @@ from sensor_msgs.msg import Range
 import Adafruit_PCA9685
 import atexit
 
+
+# ちょっとぶつかるけどそれっぽく走れる
+
 # 両壁の中央を走るプログラム
 class AutoController:
 
