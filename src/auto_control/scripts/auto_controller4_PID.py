@@ -104,7 +104,7 @@ class AutoController:
         # if min_front_distance > 20:
         #     self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
         if min_front_distance > 1:
-            self.current_esc_pulse = min(self.esc_neutral + 23, self.esc_max)
+            self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
@@ -119,7 +119,17 @@ class AutoController:
         I = self.err_total * self.Ki
         D = (self.err_prev - self.err) * self.Kd
 
-        if self.front_right_distance < 20:
+        if self.front_center_distance < 40:
+            if self.front_center_distance < 20:
+                rospy.loginfo("----->>>>")
+                P += 50
+            if self.front_left_distance < self.front_right_distance:
+                rospy.loginfo("----->>>>")
+                P += 50
+            else:
+                rospy.loginfo("<<<<-----")
+                P -= 50
+        elif self.front_right_distance < 20:
             P -= 50  # ステアリングを大きく左に切る
             rospy.loginfo("右側前方センサーが近いため、左にステアリングを切ります。")
         # 左側センサーが10cmより近い場合、右に大きくステアリングを切る
@@ -134,6 +144,7 @@ class AutoController:
         elif self.left_distance < 5:
             P += 50  # ステアリングを大きく右に切る
             rospy.loginfo("左側センサーが近いため、右にステアリングを切ります。")
+                
         else:
             rospy.loginfo("！！！安全！！！")
 
