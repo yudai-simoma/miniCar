@@ -48,7 +48,7 @@ def sensor_node():
 
         rospy.init_node('sensor_node', anonymous=True)
         pubs = [rospy.Publisher(topic, Range, queue_size=10) for topic in topics]
-        rate = rospy.Rate(26)  # 1秒間に20回の頻度で実行
+        rate = rospy.Rate(15)  # 1秒間に20回の頻度で実行
 
         while not rospy.is_shutdown():
             for i, (pin, pub) in enumerate(zip(echo_pins, pubs)):

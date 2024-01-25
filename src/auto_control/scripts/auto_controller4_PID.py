@@ -8,7 +8,7 @@ import atexit
 # 両壁の中央を走るプログラム
 class AutoController:
 
-    UPDATE_RATE = 26  # 更新頻度（1秒間に何回処理を行うか）
+    UPDATE_RATE = 15  # 更新頻度（1秒間に何回処理を行うか）
 
     def __init__(self):
         self.pwm = Adafruit_PCA9685.PCA9685()
@@ -70,13 +70,13 @@ class AutoController:
 
     def left_callback(self, msg):
         self.left_distance = msg.range * 100
-        # if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-        #     rospy.loginfo(f"\t\t\t\t\t左側センサー距離: {self.left_distance} cm")
+        if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
+            rospy.loginfo(f"\t\t\t\t左側センサー距離: {self.left_distance} cm")
 
     def right_callback(self, msg):
         self.right_distance = msg.range * 100
-        # if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
-        #     rospy.loginfo(f"右側センサー距離: {self.right_distance} cm")
+        if self.log_counter % self.UPDATE_RATE == 0:  # 1秒ごとにログを出力
+            rospy.loginfo(f"右側センサー距離: {self.right_distance} cm")
 
     def stop_motors(self):
         rospy.loginfo("Stopping motors...")
@@ -104,7 +104,7 @@ class AutoController:
         # if min_front_distance > 20:
         #     self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
         if min_front_distance > 1:
-            self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
+            self.current_esc_pulse = min(self.esc_neutral + 22, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
@@ -119,30 +119,21 @@ class AutoController:
         I = self.err_total * self.Ki
         D = (self.err_prev - self.err) * self.Kd
 
-        # rospy.loginfo(f"Front_right_distance = {self.front_right_distance}, Front_left_distance = {self.front_left_distance}")
-        # rospy.loginfo(f"P = {P}, I = {I}, D = {D}, all = {P + I + D}")
-
-
-        # 正面センサーが30cmより近くなった場合に舵を最大右に切る
-        # front_center_threshold = 40  # 正面センサーの閾値
-        # if self.front_center_distance < front_center_threshold:
-        #     # rospy.loginfo(f"正面センサーが{front_center_threshold}cmより近いため、最大右に舵を切ります。")
-        #     steer_pwm = self.servo_max  # 最大右に舵を切る
-        # else:
-        #     # 左側の壁からの距離に基づいてステアリングを調整する
-        #     # ここでは、左側の距離が特定の閾値より小さい場合、右にステアリングを切る
-        #     left_wall_threshold = 70  # 15cm以下の場合、左の壁に近づいていると判断
-        #     right_wall_threshold = 80
-        #     # if self.front_left_distance < left_wall_threshold or \
-        #     #     self.left_distance < left_wall_threshold:
-        #     if self.front_left_distance < left_wall_threshold:
-        #         # rospy.loginfo(f"左の壁に近づいているため、右にステアリングを切ります。")
-        #         P += 40  # この値は実際の挙動を見て調整する
-        #     # elif self.front_right_distance < right_wall_threshold or \
-        #     #     self.right_distance < right_wall_threshold:
-        #     elif self.front_right_distance < right_wall_threshold:
-        #         # rospy.loginfo(f"右の壁に近づいているため、左にステアリングを切ります。")
-        #         P -= 40  # この値は実際の挙動を見て調整する
+        if self.front_right_distance < 20:
+            P -= 50  # ステアリングを大きく左に切る
+            rospy.loginfo("右側センサーが近いため、左にステアリングを切ります。")
+        # 左側センサーが10cmより近い場合、右に大きくステアリングを切る
+        if self.front_left_distance < 20:
+            P += 50  # ステアリングを大きく右に切る
+            rospy.loginfo("左側センサーが近いため、右にステアリングを切ります。")
+        # 右側センサーが10cmより近い場合、左に大きくステアリングを切る
+        if self.right_distance < 5:
+            P -= 50  # ステアリングを大きく左に切る
+            rospy.loginfo("右側センサーが近いため、左にステアリングを切ります。")
+        # 左側センサーが10cmより近い場合、右に大きくステアリングを切る
+        if self.left_distance < 5:
+            P += 50  # ステアリングを大きく右に切る
+            rospy.loginfo("左側センサーが近いため、右にステアリングを切ります。")
 
         steer_pwm = int(P + I + D)
 
