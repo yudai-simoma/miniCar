@@ -57,51 +57,51 @@ class WallFollowerController:
         self.pwm.set_pwm(self.servo_channel, 0, int(self.servo_medium))
     
 
-    # アン1_______________________________________________________________________________________________________
-    def calculate_servo_angle(self):
-        front_left = self.front_left_distance
-        front_right = self.front_right_distance
-        front = self.front_center_distance
-        right = self.right_distance
-        left = self.left_distance
+    # # アン1_______________________________________________________________________________________________________
+    # def calculate_servo_angle(self):
+    #     front_left = self.front_left_distance
+    #     front_right = self.front_right_distance
+    #     front = self.front_center_distance
+    #     right = self.right_distance
+    #     left = self.left_distance
 
-        f = r = l = e = 0
-        rospy.sleep(0.3)
-        # rospy.loginfo({front})
-        # rospy.loginfo({right})
-        # rospy.loginfo({left})
-        # rospy.loginfo({front_left})
-        # rospy.loginfo({front_right})
+    #     f = r = l = e = 0
+    #     rospy.sleep(0.3)
+    #     # rospy.loginfo({front})
+    #     # rospy.loginfo({right})
+    #     # rospy.loginfo({left})
+    #     # rospy.loginfo({front_left})
+    #     # rospy.loginfo({front_right})
 
-        while (e < 7):
-            if front > 130:
-                f += 1
-            elif left < 43 or front_left < 48:
-                # rospy.loginfo("右折")
-                r += 1
-                if front_left < left + 5:
-                    r += 1
-            elif right < 43 or front_right < 48:
-                # rospy.loginfo("左折")
-                l += 1
-                if front_right < right + 5:
-                    l += 1
-            elif front <= 40:
-                if front_left <= front_right:
-                    r += 1
-                elif front_right <= front_left:
-                    l += 1
-            e += 1
-            if f > 3:
-                rospy.loginfo("前進")
-                return 90
-            if r > 3:
-                rospy.loginfo("右折")
-                return 180
-            if l > 3:
-                rospy.loginfo("左折")
-                return 0
-        return None
+    #     while (e < 7):
+    #         if front > 130:
+    #             f += 1
+    #         elif left < 43 or front_left < 48:
+    #             # rospy.loginfo("右折")
+    #             r += 1
+    #             if front_left < left + 5:
+    #                 r += 1
+    #         elif right < 43 or front_right < 48:
+    #             # rospy.loginfo("左折")
+    #             l += 1
+    #             if front_right < right + 5:
+    #                 l += 1
+    #         elif front <= 40:
+    #             if front_left <= front_right:
+    #                 r += 1
+    #             elif front_right <= front_left:
+    #                 l += 1
+    #         e += 1
+    #         if f > 3:
+    #             rospy.loginfo("前進")
+    #             return 90
+    #         if r > 3:
+    #             rospy.loginfo("右折")
+    #             return 180
+    #         if l > 3:
+    #             rospy.loginfo("左折")
+    #             return 0
+    #     return None
     
     # あん２__________________________________________________________________________________________________________
     # 左にずっと酔っていたい
@@ -114,19 +114,47 @@ class WallFollowerController:
 
         f = r = l = e = 0
         rospy.sleep(0.1)
-        # rospy.loginfo({front})
-        # rospy.loginfo({right})
-        # rospy.loginfo({left})
-        # rospy.loginfo({front_left})
-        # rospy.loginfo({front_right})
-        if (left > 50 and right > 50) and front < 40:
+        rospy.loginfo("left%s",{left})
+        rospy.loginfo("__________front left%s",{front_left})
+        rospy.loginfo("__________________________ftront%s",{front})
+        rospy.loginfo("__________________________________________front_right%s",{front_right})
+        rospy.loginfo("___________________________________________________________________right%s",{right})
+        if front_right < 26 or right < 23:
+            return 0
+        if left > 50 and right > 40 and front < 40:
+            if (front_left > front_right):
+                return 0
             return 180
-        if left < 50 and front_left < 55:
-            if  (left < 30 and front_left < 33) or (left + 5 < front_left):
+        if left < 50 and front_left > 60:
+            return 0
+        if front_left < 50 or left < 45:
+            if (front_left < 26 or left <23):
                 return 180
-            return 90
+            else:
+                return 90
         else:
             return 0
+
+        # if (left > 50 and right > 50) and front < 40
+        #     return 180
+        # if left < 50 and front_left < 55:
+        #     if  (left < 30 and front_left < 33) or(left + 5 < front_left):
+        #         return 180
+        #     return 90
+        # else:
+        #     return 0
+
+
+        # if front < 50 or ((front_left > 50) and (right > 100)):
+        #     if front_left > 70:
+        #         return 0
+        #     return 180
+        # if front_left < 55:
+        #     if  front_left < 33 or (left + 5 < front_left):
+        #         return 180migika直線
+        #     return 90
+        # else:
+        #     return 0
     
 
 
