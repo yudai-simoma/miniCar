@@ -89,7 +89,7 @@ class AutoController:
         min_front_distance = min(self.left_far_distance, self.center_distance, self.right_far_distance)
 
         if min_front_distance > 1:
-            self.current_esc_pulse = min(self.esc_neutral + 25, self.esc_max)
+            self.current_esc_pulse = min(self.esc_neutral + 26, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 

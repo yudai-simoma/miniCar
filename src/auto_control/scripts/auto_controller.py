@@ -43,7 +43,7 @@ class AutoController:
         # self.Ki = 0.01     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
         # self.Kd = 0.5      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
         self.Kp = 1.2      # P: 目的の値に差分があったときにどの比率で舵を切るかの比率
-        self.Ki = 0.000     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
+        self.Ki = 0.001     # I: Pだけだと誤差が出るため、誤差を直す時に証する値
         self.Kd = 0.2      # D: PやIだけだと、目的地を通り過ぎてしまい舵切りがカクカクするのを防ぐ値
 
         self.err_total = 0
@@ -89,7 +89,7 @@ class AutoController:
         min_front_distance = min(self.left_far_distance, self.center_distance, self.right_far_distance)
 
         if min_front_distance > 1:
-            self.current_esc_pulse = min(self.esc_neutral + 24, self.esc_max)
+            self.current_esc_pulse = min(self.esc_neutral + 26, self.esc_max)
         else:
             self.current_esc_pulse = min(self.esc_neutral, self.esc_max)
 
